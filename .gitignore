@@ -4,6 +4,9 @@
 # IDEs
 .idea
 
+# Large files
+hw2/data
+
 ### Emacs ###
 # -*- mode: gitignore; -*-
 *~
