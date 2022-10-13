@@ -47,17 +47,32 @@ class CrossEntropyLoss:     # TODO: Make this work!!!
         return gradient
 
 
-class SoftmaxActivation:    # TODO: Make this work!!!
+class SoftmaxActivation:   
     def __init__(self):
+        self.arr = [] # added to be used in the call and grad
         pass
 
     def __call__(self, y):
-        # TODO: Calculate Activation Function
-        pass
+        # assumed that y is a np array. may need to fix later.
+        exponeitate = np.exp(y)
+        probs = exponeitate / np.sum(exponeitate)
+        summ = probs.sum() # the sum
+        self.arr = summ
+        return summ
 
     def __grad__(self):
-        # TODO: Calculate Gradients.. Remember this is calculated w.r.t. input to the function -> dy/dz
-        pass
+        # assumed that we are using the calcuated summ from the call function. 
+        arr = self.arr
+        jacobianMatrix = np.diag(arr)
+        length = len(jacobianMatrix)
+        for i in range(length):
+            for j in range(length):
+                if i == j:
+                    jacobianMatrix[i][j] = arr[i] * (1-arr[i])
+                else:
+                    jacobianMatrix[i][j] = -arr[i] * arr[j]
+        
+        return jacobianMatrix 
 
 
 class SigmoidActivation:    # TODO: Make this work!!!
