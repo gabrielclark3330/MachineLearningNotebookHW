@@ -37,8 +37,18 @@ def train_test_split(data, labels, n=0.8):
 	return [data[:split], labels[:split]], [data[split:], labels[split:]]
 
 
-def normalize_data(data):  # TODO
-
+def normalize_data(data):  
 	# normalize/standardize the data
+	# assuming np array.
+	# assumption: used min max normalization. And normalized x and y seperately.
+	x = data[0]
+	y = data[1]
+	normalizedData = []
 
-	return
+	xNormalized = (x - x.min()) / (x.max() - x.min())
+	yNormalized = (y - y.min()) / (y.max() - y.min())
+
+	normalizedData[0] = xNormalized
+	normalizedData[1] = yNormalized
+
+	return normalizedData
