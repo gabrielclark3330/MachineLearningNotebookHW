@@ -11,11 +11,13 @@ def read_data_labels():
 	# read in the data and the labels to feed into the ANN
 	data = datasets.load_digits()
 
+	'''
 	# Visualize the data
 	print('Shape:', data.data.shape)
 	plt.gray()
 	plt.matshow(data.images[0])
 	plt.show()
+	'''
 
 	x = data.data
 	y = data.target
