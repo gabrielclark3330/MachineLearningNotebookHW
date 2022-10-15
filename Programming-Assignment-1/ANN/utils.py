@@ -73,15 +73,19 @@ class SoftmaxActivation:
 
 class SigmoidActivation:    # TODO: Make this work!!!
     def __init__(self):
+        self.y = None
         pass
 
     def __call__(self, y):
-        # TODO: Calculate Activation Function
-        pass
+        self.y = y
+        z = 1/(1 + np.exp(-y))
+        return z
 
     def __grad__(self):
         # TODO: Calculate Gradients.. Remember this is calculated w.r.t. input to the function -> dy/dz
-        pass
+        f = 1/(1+np.exp(-self.y))
+        df = f * (1 - f)
+        return df
 
 
 class ReLUActivation:

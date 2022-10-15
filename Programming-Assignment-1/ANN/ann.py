@@ -86,7 +86,7 @@ class ANN:
         bO = bO - alpha * dBO
         return wH, bH, wO, bO
 
-    def train(self, dataset, learning_rate=0.01, num_epochs=100): # TODO
+    def train(self, dataset, learning_rate=0.1, num_epochs=100): # TODO
         self.initialize_weights()
         for epoch in range(num_epochs):
             zH, aH, zO, aO = self.forward(dataset[0])
@@ -99,6 +99,7 @@ class ANN:
             #print(wH, bH, wO, bO)
             self.hidden_weights, self.hidden_bias, self.output_weights, self.output_bias = \
                 self.update_params(self.hidden_weights, self.hidden_bias, self.output_weights, self.output_bias, dWH, dBH, dWO, dBO, learning_rate)
+            print(self.test(dataset))
 
     def test(self, test_dataset):
         accuracy = 0  # Test accuracy
@@ -112,7 +113,7 @@ class ANN:
 
 
 def main(argv):
-    ann = ANN(64, 16, 10, ReLUActivation(), SoftmaxActivation(), CrossEntropyLoss())
+    ann = ANN(64, 16, 10, SigmoidActivation(), SoftmaxActivation(), CrossEntropyLoss())
 
     # Load dataset
     dataset = read_data_labels()  # dataset[0] = X, dataset[1] = y
