@@ -45,7 +45,7 @@ def normalize_data(data):
 	# assumption: used min max normalization. And normalized x and y seperately.
 	x = data[0]
 	y = data[1]
-	normalizedData = []
+	normalizedData = [[],[]]
 
 	xNormalized = (x - x.min()) / (x.max() - x.min())
 	yNormalized = (y - y.min()) / (y.max() - y.min())

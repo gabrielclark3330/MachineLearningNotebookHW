@@ -3,7 +3,7 @@ import numpy as np
 import math
 
 from data import read_data_labels, normalize_data, train_test_split, to_categorical
-from utils import accuracy_score, CrossEntropyLoss, SigmoidActivation, SoftmaxActivation, ReLUActivation
+from utils import accuracy_score, CrossEntropyLoss, SigmoidActivation, SoftmaxActivation, ReLUActivation, MSELoss
 
 # Create an MLP with 8 neurons
 # Input -> Hidden Layer -> Output Layer -> Output
@@ -44,10 +44,10 @@ class ANN:
         # input [1 x 5] | middle [5 X 10] -> create [1 X 10] | output [10 X 2] -> create [1 X 2]
         # so input [1 X len(x)] | middle [len(x) X self.number_hidden_units] | output [self.number_hidden_units X self.number_outputs]
 
-        self.hidden_bias = np.random.randn()*.1
-        self.output_bias = np.random.randn()*.1
-        self.hidden_weights = np.random.randn(self.num_input_features, self.num_hidden_units)*.1
-        self.output_weights = np.random.randn(self.num_hidden_units, self.num_outputs)*.1
+        self.hidden_bias = np.random.rand() - .5
+        self.output_bias = np.random.rand() - .5
+        self.hidden_weights = np.random.rand(self.num_input_features, self.num_hidden_units) - .5
+        self.output_weights = np.random.rand(self.num_hidden_units, self.num_outputs) - .5
 
 
     def forward(self, x):  # TODO
@@ -62,13 +62,13 @@ class ANN:
         zH = np.dot(x, self.hidden_weights) + self.hidden_bias
         print("zH", zH)
         neuron_activations = ReLUActivation().__call__(zH)
-        print("activations", neuron_activations)
+        print("relu activations", neuron_activations)
 
         # Output layer
         zO = np.dot(neuron_activations, self.output_weights) + self.output_bias
         print("zO", zO)
-        neuron_activations = ReLUActivation().__call__(zO)
-        print("activations", neuron_activations)
+        neuron_activations = SoftmaxActivation().__call__(zO)
+        print("softmax activations", neuron_activations)
         return neuron_activations
 
 
@@ -82,11 +82,15 @@ class ANN:
     def train(self, dataset, learning_rate=0.01, num_epochs=100):
         self.initialize_weights()
         for epoch in range(num_epochs):
-            for index in range(len(dataset[0])): # dataset[0] is the array of pieces of data
+            for index in range(len(dataset[0])): # dataset[0] is the data dataset[1] is labels
                 data = dataset[0][index]
                 label = dataset[1][index]
                 print("label",label)
                 prediction = self.forward(data)
+                vectorized_label = [1 if x==label else 0 for x in range(10)]
+                print("Compare pred and label", prediction, vectorized_label)
+                loss = MSELoss.__call__(self, prediction, vectorized_label)
+                print(loss)
                 break
             break
 
@@ -103,6 +107,7 @@ def main(argv):
 
     # Load dataset
     dataset = read_data_labels()  # dataset[0] = X, dataset[1] = y
+    dataset = normalize_data(dataset)
 
     # Split data into train and test split. call function in data.py
     #train[0] is the collection of training data and train[1] is the collection of training labels
