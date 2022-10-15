@@ -31,7 +31,7 @@ def to_categorical(y):
 	return y
 
 
-def train_test_split(data, labels, n=0.8):
+def train_test_split(data, labels, n=0.8): # TODO add shuffling
 	assert len(data) == len(labels), 'Data and labels are not the same length!'
 
 	# split data in training and testing sets
@@ -43,6 +43,7 @@ def normalize_data(data):
 	# normalize/standardize the data
 	# assuming np array.
 	# assumption: used min max normalization. And normalized x and y seperately.
+	'''
 	x = data[0]
 	y = data[1]
 	normalizedData = [[],[]]
@@ -52,5 +53,5 @@ def normalize_data(data):
 
 	normalizedData[0] = xNormalized
 	normalizedData[1] = yNormalized
-
-	return normalizedData
+	'''
+	return (data - data.min()) / (data.max() - data.min())

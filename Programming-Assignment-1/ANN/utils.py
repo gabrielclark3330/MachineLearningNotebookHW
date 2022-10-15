@@ -56,7 +56,7 @@ class SoftmaxActivation:
         e = np.exp(y)
         return e / e.sum()
 
-    def __grad__(self):
+    def __grad__(self): # TODO: Fix this function
         # assumed that we are using the calcuated summ from the call function. 
         arr = self.arr
         jacobianMatrix = np.diag(arr)
@@ -95,7 +95,7 @@ class ReLUActivation:
         y = np.maximum(z, 0)
         return y
 
-    def __grad__(self):
+    def __grad__(self): #, z
         # dy/dz = 1 if z was > 0 or dy/dz = 0 if z was <= 0
         gradient = np.where(self.z > 0, 1, 0)
         return gradient

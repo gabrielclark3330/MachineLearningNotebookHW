@@ -50,83 +50,93 @@ class ANN:
         self.output_weights = np.random.rand(self.num_hidden_units, self.num_outputs) - .5
 
 
-    def forward(self, x):  # TODO
-        # x = input matrix
+    def forward(self, x):
+        # x = input matrix or entire dataset
         # hidden activation y = f(z), where z = w.x + b
         # output = g(z'), where z' =  w'.y + b'
         # Trick here is not to think in terms of one neuron at a time
         # Rather think in terms of matrices where each 'element' represents a neuron
         # and a layer operation is carried out as a matrix operation corresponding to all neurons of the layer
-        print("X", x)
         # where x is a [1 X self.num_input_features]
         zH = np.dot(x, self.hidden_weights) + self.hidden_bias
-        print("zH", zH)
-        neuron_activations = ReLUActivation().__call__(zH)
-        print("relu activations", neuron_activations)
+        aH = self.hidden_unit_activation.__call__(zH)
 
         # Output layer
-        zO = np.dot(neuron_activations, self.output_weights) + self.output_bias
-        print("zO", zO)
-        neuron_activations = SoftmaxActivation().__call__(zO)
-        print("softmax activations", neuron_activations)
-        return neuron_activations
+        zO = np.dot(aH, self.output_weights) + self.output_bias
+        aO = self.output_activation.__call__(zO)
+        return zH, aH, zO, aO
 
 
-    def backward(self):  # TODO
-        pass
+    def backward(self, number_data_samples, zH, aH, zO, aO, x, y): # TODO
+        wH = self.hidden_weights
+        wO = self.output_weights
+        dZO = aO - y
+        dWO = 1 / number_data_samples * aH.T.dot(dZO)
+        dBO = 1 / number_data_samples * np.sum(dZO)
+        dZH = dZO.dot(wO.T) * self.hidden_unit_activation.__grad__() #zH
+        dWH = 1 / number_data_samples * x.T.dot(dZH)
+        dBH = 1 / number_data_samples * np.sum(dZH)
+        return dWH, dBH, dWO, dBO
 
-    def update_params(self, wH, bH, wO, bO, dWH, dBH, dWO, dBO, alpha):  # TODO
+    def update_params(self, wH, bH, wO, bO, dWH, dBH, dWO, dBO, alpha):
         # Take the optimization step.
-        wH = wH - alpha *dWH
-        bH = bH - alpha *dBH
-        wO = wO - alpha *dWO
-        bO = bO - alpha *dBO
+        wH = wH - alpha * dWH
+        bH = bH - alpha * dBH
+        wO = wO - alpha * dWO
+        bO = bO - alpha * dBO
         return wH, bH, wO, bO
 
-    def train(self, dataset, learning_rate=0.01, num_epochs=100):
+    def train(self, dataset, learning_rate=0.01, num_epochs=100): # TODO
         self.initialize_weights()
         for epoch in range(num_epochs):
-            for index in range(len(dataset[0])): # dataset[0] is the data dataset[1] is labels
-                data = dataset[0][index]
-                label = dataset[1][index]
-                print("label",label)
-                prediction = self.forward(data)
-                onehot_label = [1 if x==label else 0 for x in range(10)]
-                print("Compare pred and label", prediction, onehot_label)
-                loss = MSELoss.__call__(self, prediction, onehot_label)
-                print("loss", loss)
-                break
-            break
+            zH, aH, zO, aO = self.forward(dataset[0])
+            onehot_labels = [[1 if x==label else 0 for x in range(10)] for label in dataset[1]]
+            #print("Compare pred and label", aO, onehot_labels)
+            loss = MSELoss.__call__(self, aO, onehot_labels)
+            #print("loss", loss)
+            number_data_samples = len(dataset[0])
+            dWH, dBH, dWO, dBO = self.backward(number_data_samples, zH, aH, zO, aO, dataset[0], onehot_labels)
+            #print(wH, bH, wO, bO)
+            self.hidden_weights, self.hidden_bias, self.output_weights, self.output_bias = \
+                self.update_params(self.hidden_weights, self.hidden_bias, self.output_weights, self.output_bias, dWH, dBH, dWO, dBO, learning_rate)
 
     def test(self, test_dataset):
         accuracy = 0  # Test accuracy
         # Get predictions from test dataset
         # Calculate the prediction accuracy, see utils.py
-        accuracy_score(test_dataset[1], )  # TODO
+        zH, aH, zO, aO = self.forward(test_dataset[0])
+        #print(aO)
+        guesses = [list(x).index(max(x)) for x in aO]
+        accuracy = accuracy_score(test_dataset[1], guesses)  # TODO
         return accuracy
 
 
 def main(argv):
-    ann = ANN(64, 16, 10, SigmoidActivation(), SoftmaxActivation(), CrossEntropyLoss())
+    ann = ANN(64, 16, 10, ReLUActivation(), SoftmaxActivation(), CrossEntropyLoss())
 
     # Load dataset
     dataset = read_data_labels()  # dataset[0] = X, dataset[1] = y
-    dataset = normalize_data(dataset)
 
     # Split data into train and test split. call function in data.py
     #train[0] is the collection of training data and train[1] is the collection of training labels
     train, test = train_test_split(dataset[0], dataset[1])
 
+    norm_train = [[], train[1]]
+    norm_train[0] = normalize_data(train[0])
+    norm_test = [[], test[1]]
+    norm_test[0] = normalize_data(test[0])
+
+
     # call ann->train()... Once trained, try to store the model to avoid re-training everytime
     if mode == 'train':
         # Call ann training code here
-        ann.train(train)
+        ann.train(norm_train)
     else:
         # Call loading of trained model here, if using this mode (Not required, provided for convenience)
         raise NotImplementedError
 
     # Call ann->test().. to get accuracy in test set and print it.
-    print('Accuracy:', ann.test(test))
+    print('Accuracy:', ann.test(norm_test))
 
 
 if __name__ == "__main__":
