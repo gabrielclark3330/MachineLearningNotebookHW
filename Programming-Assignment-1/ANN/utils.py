@@ -53,16 +53,8 @@ class SoftmaxActivation:
         pass
 
     def __call__(self, y):
-        e = exp(vector)
+        e = np.exp(y)
         return e / e.sum()
-        '''
-        # assumed that y is a np array. may need to fix later.
-        exponeitate = np.exp(y)
-        probs = exponeitate / np.sum(exponeitate)
-        summ = probs.sum() # the sum
-        self.arr = summ
-        return summ
-        '''
 
     def __grad__(self):
         # assumed that we are using the calcuated summ from the call function. 

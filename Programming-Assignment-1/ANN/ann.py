@@ -75,9 +75,13 @@ class ANN:
     def backward(self):  # TODO
         pass
 
-    def update_params(self):  # TODO
+    def update_params(self, wH, bH, wO, bO, dWH, dBH, dWO, dBO, alpha):  # TODO
         # Take the optimization step.
-        return
+        wH = wH - alpha *dWH
+        bH = bH - alpha *dBH
+        wO = wO - alpha *dWO
+        bO = bO - alpha *dBO
+        return wH, bH, wO, bO
 
     def train(self, dataset, learning_rate=0.01, num_epochs=100):
         self.initialize_weights()
@@ -87,10 +91,10 @@ class ANN:
                 label = dataset[1][index]
                 print("label",label)
                 prediction = self.forward(data)
-                vectorized_label = [1 if x==label else 0 for x in range(10)]
-                print("Compare pred and label", prediction, vectorized_label)
-                loss = MSELoss.__call__(self, prediction, vectorized_label)
-                print(loss)
+                onehot_label = [1 if x==label else 0 for x in range(10)]
+                print("Compare pred and label", prediction, onehot_label)
+                loss = MSELoss.__call__(self, prediction, onehot_label)
+                print("loss", loss)
                 break
             break
 
