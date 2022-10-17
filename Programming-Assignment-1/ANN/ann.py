@@ -127,7 +127,7 @@ def main(argv):
     norm_train[0] = norm_train[0].T
     norm_test = [[], test[1]]
     norm_test[0] = normalize_data(test[0])
-    norm_test = norm_test[0].T
+    norm_test[0] = norm_test[0].T
 
     # call ann->train()... Once trained, try to store the model to avoid re-training everytime
     if mode == 'train':

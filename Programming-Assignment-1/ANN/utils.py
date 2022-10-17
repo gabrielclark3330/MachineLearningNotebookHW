@@ -53,9 +53,14 @@ class SoftmaxActivation:
         pass
 
     def __call__(self, y):
+        '''
         self.arr = y
         e = np.exp(y)
         return e / e.sum()
+        ''' # numerically stable version
+        self.arr = y
+        exps = np.exp(y - y.max())
+        return exps / np.sum(exps, axis=0)
 
     def __grad__(self): # TODO: Fix this function
         # assumed that we are using the calcuated summ from the call function. 
@@ -77,7 +82,7 @@ class SoftmaxActivation:
         return jac
 
 
-class SigmoidActivation:    # TODO: Make this work!!!
+class SigmoidActivation:
     def __init__(self):
         self.y = None
         pass
@@ -88,7 +93,7 @@ class SigmoidActivation:    # TODO: Make this work!!!
         return z
 
     def __grad__(self):
-        # TODO: Calculate Gradients.. Remember this is calculated w.r.t. input to the function -> dy/dz
+        #Calculate Gradients.. Remember this is calculated w.r.t. input to the function -> dy/dz
         f = 1/(1+np.exp(-self.y))
         df = f * (1 - f)
         return df
