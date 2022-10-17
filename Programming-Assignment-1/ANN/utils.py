@@ -53,11 +53,13 @@ class SoftmaxActivation:
         pass
 
     def __call__(self, y):
+        self.arr = y
         e = np.exp(y)
         return e / e.sum()
 
     def __grad__(self): # TODO: Fix this function
         # assumed that we are using the calcuated summ from the call function. 
+        '''
         arr = self.arr
         jacobianMatrix = np.diag(arr)
         length = len(jacobianMatrix)
@@ -69,6 +71,10 @@ class SoftmaxActivation:
                     jacobianMatrix[i][j] = -arr[i] * arr[j]
         
         return jacobianMatrix 
+        '''
+        SM = self.arr.reshape((-1,1))
+        jac = np.diagflat(self.arr) - np.dot(SM, SM.T)
+        return jac
 
 
 class SigmoidActivation:    # TODO: Make this work!!!

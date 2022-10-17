@@ -70,7 +70,8 @@ class ANN:
     def backward(self, number_data_samples, zH, aH, zO, aO, x, y): # TODO
         wH = self.hidden_weights
         wO = self.output_weights
-        dZO = aO - y
+        #dZO = aO - y
+        dZO = self.loss_function.__call__(aO, y)
         dWO = 1 / number_data_samples * aH.T.dot(dZO)
         dBO = 1 / number_data_samples * np.sum(dZO)
         dZH = dZO.dot(wO.T) * self.hidden_unit_activation.__grad__() #zH
@@ -106,14 +107,14 @@ class ANN:
         # Get predictions from test dataset
         # Calculate the prediction accuracy, see utils.py
         zH, aH, zO, aO = self.forward(test_dataset[0])
-        #print(aO)
+        #print(sum(aO[0]))
         guesses = [list(x).index(max(x)) for x in aO]
-        accuracy = accuracy_score(test_dataset[1], guesses)  # TODO
+        accuracy = accuracy_score(test_dataset[1], guesses)
         return accuracy
 
 
 def main(argv):
-    ann = ANN(64, 16, 10, SigmoidActivation(), SoftmaxActivation(), CrossEntropyLoss())
+    ann = ANN(64, 16, 10, SigmoidActivation(), SoftmaxActivation(), MSELoss())
 
     # Load dataset
     dataset = read_data_labels()  # dataset[0] = X, dataset[1] = y
