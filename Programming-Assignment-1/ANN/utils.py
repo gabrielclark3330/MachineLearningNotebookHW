@@ -53,9 +53,14 @@ class SoftmaxActivation:
         pass
 
     def __call__(self, y):
+        '''
         self.arr = y
         e = np.exp(y)
         return e / e.sum()
+        '''
+        self.arr = y
+        exps = np.exp(y - y.max())
+        return exps / np.sum(exps, axis=0)
 
     def __grad__(self): # TODO: Fix this function
         # assumed that we are using the calcuated summ from the call function. 

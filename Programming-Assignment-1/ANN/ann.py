@@ -44,8 +44,8 @@ class ANN:
         # input [1 x 5] | middle [5 X 10] -> create [1 X 10] | output [10 X 2] -> create [1 X 2]
         # so input [1 X len(x)] | middle [len(x) X self.number_hidden_units] | output [self.number_hidden_units X self.number_outputs]
 
-        self.hidden_bias = np.random.rand() - .5
-        self.output_bias = np.random.rand() - .5
+        self.hidden_bias = np.random.rand(1, self.num_hidden_units) - .5
+        self.output_bias = np.random.rand(1, self.num_outputs) - .5
         self.hidden_weights = np.random.rand(self.num_input_features, self.num_hidden_units) - .5
         self.output_weights = np.random.rand(self.num_hidden_units, self.num_outputs) - .5
 
@@ -70,8 +70,8 @@ class ANN:
     def backward(self, number_data_samples, zH, aH, zO, aO, x, y): # TODO
         wH = self.hidden_weights
         wO = self.output_weights
-        #dZO = aO - y
-        dZO = self.loss_function.__call__(aO, y)
+        dZO = aO - y
+        #dZO = self.loss_function.__call__(aO, y)
         dWO = 1 / number_data_samples * aH.T.dot(dZO)
         dBO = 1 / number_data_samples * np.sum(dZO)
         dZH = dZO.dot(wO.T) * self.hidden_unit_activation.__grad__() #zH
@@ -87,7 +87,7 @@ class ANN:
         bO = bO - alpha * dBO
         return wH, bH, wO, bO
 
-    def train(self, dataset, learning_rate=0.1, num_epochs=100): # TODO
+    def train(self, dataset, learning_rate=0.1, num_epochs=500): # TODO
         self.initialize_weights()
         for epoch in range(num_epochs):
             zH, aH, zO, aO = self.forward(dataset[0])
