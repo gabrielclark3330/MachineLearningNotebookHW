@@ -69,8 +69,9 @@ class ANN:
     def backward(self, number_data_samples, zH, aH, zO, aO, x, y): # TODO
         wH = self.hidden_weights
         wO = self.output_weights
-        dZO = aO - np.array(y).T
-        #dZO = self.loss_function.__call__(aO, y)
+        #dZO = aO - np.array(y).T
+        loss = self.loss_function.__call__(aO, np.array(y).T)
+        dZO = self.loss_function.grad()
         dWO = 1 / number_data_samples * dZO.dot(aH.T)
         dBO = 1 / number_data_samples * np.sum(dZO)
         dZH = wO.T.dot(dZO) * self.hidden_unit_activation.__grad__() #zH
