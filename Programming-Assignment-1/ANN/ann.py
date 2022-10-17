@@ -58,11 +58,11 @@ class ANN:
         # Rather think in terms of matrices where each 'element' represents a neuron
         # and a layer operation is carried out as a matrix operation corresponding to all neurons of the layer
         # where x is a [1 X self.num_input_features]
-        zH = np.dot(x, self.hidden_weights) + self.hidden_bias
+        zH = x.dot(self.hidden_weights) + self.hidden_bias
         aH = self.hidden_unit_activation.__call__(zH)
 
         # Output layer
-        zO = np.dot(aH, self.output_weights) + self.output_bias
+        zO = aH.dot(self.output_weights) + self.output_bias
         aO = self.output_activation.__call__(zO)
         return zH, aH, zO, aO
 
@@ -87,7 +87,7 @@ class ANN:
         bO = bO - alpha * dBO
         return wH, bH, wO, bO
 
-    def train(self, dataset, learning_rate=0.1, num_epochs=500): # TODO
+    def train(self, dataset, learning_rate=0.1, num_epochs=200): # TODO
         self.initialize_weights()
         for epoch in range(num_epochs):
             zH, aH, zO, aO = self.forward(dataset[0])
