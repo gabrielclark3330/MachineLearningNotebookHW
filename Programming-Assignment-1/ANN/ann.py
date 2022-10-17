@@ -44,10 +44,10 @@ class ANN:
         # input [1 x 5] | middle [5 X 10] -> create [1 X 10] | output [10 X 2] -> create [1 X 2]
         # so input [1 X len(x)] | middle [len(x) X self.number_hidden_units] | output [self.number_hidden_units X self.number_outputs]
 
-        self.hidden_bias = np.random.rand() - .5
-        self.output_bias = np.random.rand() - .5
-        self.hidden_weights = np.random.rand(self.num_input_features, self.num_hidden_units) - .5
-        self.output_weights = np.random.rand(self.num_hidden_units, self.num_outputs) - .5
+        self.hidden_bias = np.random.rand(self.num_hidden_units, 1) - 0.5
+        self.output_bias = np.random.rand(self.num_outputs, 1) - 0.5
+        self.hidden_weights = np.random.rand(self.num_hidden_units, self.num_input_features) - 0.5
+        self.output_weights = np.random.rand(self.num_outputs, self.num_hidden_units) - 0.5
 
 
     def forward(self, x):
@@ -58,34 +58,33 @@ class ANN:
         # Rather think in terms of matrices where each 'element' represents a neuron
         # and a layer operation is carried out as a matrix operation corresponding to all neurons of the layer
         # where x is a [1 X self.num_input_features]
-        zH = np.dot(x, self.hidden_weights) + self.hidden_bias
+        zH = self.hidden_weights.dot(x) + self.hidden_bias
         aH = self.hidden_unit_activation.__call__(zH)
 
         # Output layer
-        zO = np.dot(aH, self.output_weights) + self.output_bias
+        zO = self.output_weights.dot(aH) + self.output_bias
         aO = self.output_activation.__call__(zO)
         return zH, aH, zO, aO
-
 
     def backward(self, number_data_samples, zH, aH, zO, aO, x, y): # TODO
         wH = self.hidden_weights
         wO = self.output_weights
-        #dZO = aO - y
-        dZO = self.loss_function.__call__(aO, y)
-        dWO = 1 / number_data_samples * aH.T.dot(dZO)
+        dZO = aO - np.array(y).T
+        #dZO = self.loss_function.__call__(aO, y)
+        dWO = 1 / number_data_samples * dZO.dot(aH.T)
         dBO = 1 / number_data_samples * np.sum(dZO)
-        dZH = dZO.dot(wO.T) * self.hidden_unit_activation.__grad__() #zH
-        dWH = 1 / number_data_samples * x.T.dot(dZH)
+        dZH = wO.T.dot(dZO) * self.hidden_unit_activation.__grad__() #zH
+        dWH = 1 / number_data_samples * dZH.dot(x.T)
         dBH = 1 / number_data_samples * np.sum(dZH)
         return dWH, dBH, dWO, dBO
 
     def update_params(self, wH, bH, wO, bO, dWH, dBH, dWO, dBO, alpha):
         # Take the optimization step.
-        wH = wH - alpha * dWH
-        bH = bH - alpha * dBH
-        wO = wO - alpha * dWO
-        bO = bO - alpha * dBO
-        return wH, bH, wO, bO
+        temp_wH = wH - alpha * dWH
+        temp_bH = bH - alpha * dBH
+        temp_wO = wO - alpha * dWO
+        temp_bO = bO - alpha * dBO
+        return temp_wH, temp_bH, temp_wO, temp_bO
 
     def train(self, dataset, learning_rate=0.1, num_epochs=100): # TODO
         self.initialize_weights()
@@ -93,7 +92,7 @@ class ANN:
             zH, aH, zO, aO = self.forward(dataset[0])
             onehot_labels = [[1 if x==label else 0 for x in range(10)] for label in dataset[1]]
             #print("Compare pred and label", aO, onehot_labels)
-            loss = MSELoss.__call__(self, aO, onehot_labels)
+            #loss = MSELoss.__call__(self, aO, onehot_labels)
             #print("loss", loss)
             number_data_samples = len(dataset[0])
             dWH, dBH, dWO, dBO = self.backward(number_data_samples, zH, aH, zO, aO, dataset[0], onehot_labels)
@@ -108,7 +107,7 @@ class ANN:
         # Calculate the prediction accuracy, see utils.py
         zH, aH, zO, aO = self.forward(test_dataset[0])
         #print(sum(aO[0]))
-        guesses = [list(x).index(max(x)) for x in aO]
+        guesses = [list(x).index(max(x)) for x in aO.T]
         accuracy = accuracy_score(test_dataset[1], guesses)
         return accuracy
 
@@ -125,9 +124,10 @@ def main(argv):
 
     norm_train = [[], train[1]]
     norm_train[0] = normalize_data(train[0])
+    norm_train[0] = norm_train[0].T
     norm_test = [[], test[1]]
     norm_test[0] = normalize_data(test[0])
-
+    norm_test = norm_test[0].T
 
     # call ann->train()... Once trained, try to store the model to avoid re-training everytime
     if mode == 'train':
