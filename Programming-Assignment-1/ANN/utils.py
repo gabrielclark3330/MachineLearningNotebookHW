@@ -29,7 +29,7 @@ class MSELoss:      # For Reference
         return gradient
 
 
-class CrossEntropyLoss:     # TODO: Make this work!!!
+class CrossEntropyLoss:
     def __init__(self):
         # Buffers to store intermediate results.
         self.current_prediction = None
@@ -37,13 +37,21 @@ class CrossEntropyLoss:     # TODO: Make this work!!!
         pass
 
     def __call__(self, y_pred, y_gt):
-        # TODO: Calculate Loss Function
-        loss = None
+        self.current_prediction = y_pred
+        self.current_gt = y_gt
+
+        # loss = -sum([y_pred[i] * math.log(y_gt[i]) for i in range(len(y_pred))])
+        loss = -np.add(y_pred, np.log(y_gt))
+
         return loss
 
     def grad(self):
-        # TODO: Calculate Gradients for back propagation
-        gradient = None
+        # Derived by calculating dL/dy_pred
+        gradient = -1 * (self.current_gt - self.current_prediction)
+
+        self.current_prediction = None
+        self.current_gt = None
+
         return gradient
 
 

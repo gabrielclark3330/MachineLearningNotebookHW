@@ -114,7 +114,7 @@ class ANN:
 
 
 def main(argv):
-    ann = ANN(64, 16, 10, SigmoidActivation(), SoftmaxActivation(), MSELoss())
+    ann = ANN(64, 16, 10, SigmoidActivation(), SoftmaxActivation(), CrossEntropyLoss())
 
     # Load dataset
     dataset = read_data_labels()  # dataset[0] = X, dataset[1] = y
