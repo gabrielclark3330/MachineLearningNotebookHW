@@ -1,6 +1,7 @@
 import os, sys
 import numpy as np
 import math
+from matplotlib import pyplot as plt
 
 from data import read_data_labels, normalize_data, train_test_split, to_categorical
 from utils import accuracy_score, CrossEntropyLoss, SigmoidActivation, SoftmaxActivation, ReLUActivation, MSELoss
@@ -140,6 +141,16 @@ def main(argv):
 
     # Call ann->test().. to get accuracy in test set and print it.
     print('Accuracy:', ann.test(norm_test))
+
+
+    data_select = 3
+    #print(norm_test)
+    zH, aH, zO, aO = ann.forward(norm_test[0])
+    guesses = [list(x).index(max(x)) for x in aO.T]
+    print("AI guessed: ", guesses[data_select])
+    print("Answer is: ", norm_test[1][data_select])
+    plt.matshow(norm_test[0].T[data_select].reshape((8,8)))
+    plt.show()
 
 
 if __name__ == "__main__":
