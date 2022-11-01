@@ -38,7 +38,8 @@ class CrossEntropyLoss:     # TODO: Make this work!!!
 
     def __call__(self, y_pred, y_gt):
         # TODO: Calculate Loss Function
-        loss = None
+        # Categorical loss is what we need to look for
+        loss = -np.add(y_pred * np.log(y_gt))
         return loss
 
     def grad(self):
