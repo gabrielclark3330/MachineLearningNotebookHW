@@ -4,6 +4,9 @@
 # IDEs
 .idea
 
+# System files
+.DS_Store
+
 # Large files
 hw2/data
 
