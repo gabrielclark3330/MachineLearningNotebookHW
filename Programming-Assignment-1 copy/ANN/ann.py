@@ -89,11 +89,11 @@ class ANN:
         temp_bO = bO - alpha * dBO
         return temp_wH, temp_bH, temp_wO, temp_bO
 
-    def learning_rate_decay(self, lr, epoch, k):
-        #k = .0005
+    def learning_rate_decay(self, lr, epoch):
+        k = .0005
         return lr * math.exp(epoch*-k)
 
-    def train(self, dataset, learning_rate=0.18, num_epochs=80, k=.0005):
+    def train(self, dataset, learning_rate=0.18, num_epochs=80):
         self.initialize_weights()
         for epoch in range(num_epochs):
             zH, aH, zO, aO = self.forward(dataset[0])
@@ -104,7 +104,7 @@ class ANN:
             number_data_samples = len(dataset[0])
             dWH, dBH, dWO, dBO = self.backward(number_data_samples, zH, aH, zO, aO, dataset[0], onehot_labels)
             #print(wH, bH, wO, bO)
-            learning_rate = self.learning_rate_decay(learning_rate, epoch, k)
+            learning_rate = self.learning_rate_decay(learning_rate, epoch)
             self.hidden_weights, self.hidden_bias, self.output_weights, self.output_bias = \
                 self.update_params(self.hidden_weights, self.hidden_bias, self.output_weights, self.output_bias, dWH, dBH, dWO, dBO, learning_rate)
             print(self.test(dataset))
@@ -121,6 +121,8 @@ class ANN:
 
 
 def main(argv):
+    ann = ANN(64, 16, 10, SigmoidActivation(), SoftmaxActivation(), CrossEntropyLoss())
+
     # Load dataset
     dataset = read_data_labels()  # dataset[0] = X, dataset[1] = y
 
@@ -128,7 +130,6 @@ def main(argv):
     #train[0] is the collection of training data and train[1] is the collection of training labels
     train, test = train_test_split(dataset[0], dataset[1])
 
-    # normalize data
     norm_train = [[], train[1]]
     norm_train[0] = normalize_data(train[0])
     norm_train[0] = norm_train[0].T
@@ -136,35 +137,16 @@ def main(argv):
     norm_test[0] = normalize_data(test[0])
     norm_test[0] = norm_test[0].T
 
-    #ann = ANN(64, 16, 10, SigmoidActivation(), SoftmaxActivation(), CrossEntropyLoss())
-    #ann.train(norm_train)
-    #print('Accuracy:', ann.test(norm_test))
+    # call ann->train()... Once trained, try to store the model to avoid re-training everytime
+    if mode == 'train':
+        # Call ann training code here
+        ann.train(norm_train)
+    else:
+        # Call loading of trained model here, if using this mode (Not required, provided for convenience)
+        raise NotImplementedError
 
-    #for lr in range(.06, .2, .02):
-    epochs = []
-    ks = []
-    accuracy = []
-    for epoch in range(20, 120, 10):
-        for k in [.0005, .001, .01, .1]:
-            ann = ANN(64, 16, 10, SigmoidActivation(), SoftmaxActivation(), CrossEntropyLoss())
-            ann.train(norm_train, learning_rate=0.18, num_epochs=epoch, k=k)
-            
-            epochs.append(epoch)
-            ks.append(k)
-            accuracy.append(ann.test(norm_test))
-    
-
-
-    fig = plt.figure()
-    ax = plt.axes(projection = "3d")
-    ax.plot_trisurf(epochs, ks, accuracy, cmap='viridis', edgecolor='none')
-    ax.set_title("Graph")
-    ax.set_xlabel('Epochs')
-    ax.set_ylabel('K (lr * math.exp(epoch*-k))')
-    ax.set_zlabel('Accuracy')
-    #ax.bar3d(x, y, z, dx, dy, dz, shade=True)
-    plt.show()
-
+    # Call ann->test().. to get accuracy in test set and print it.
+    print('Accuracy:', ann.test(norm_test))
 
 
     data_select = 4
